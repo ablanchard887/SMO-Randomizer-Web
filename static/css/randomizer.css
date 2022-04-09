@@ -1,0 +1,32 @@
+label.strikethrough {
+    line-height: 0.3;
+    font-size: 15px;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+}
+
+.striked {
+    text-decoration: line-through;
+}
+
+body {
+    width:50vw;
+    margin:auto;
+}
+
+.card{
+    margin-top:20px;
+}
+
+.card-header{
+    font-size: 20px;
+}
+
+li:hover {
+    background-color: #d3d3d3;
+}

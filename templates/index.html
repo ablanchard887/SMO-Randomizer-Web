@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SMO-Randomizer</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{url_for('static', filename='css/randomizer.css')}}">
+</head>
+<body>
+    <div class="card">
+        <div class="card-header">SMO-Randomizer (now online)</div>
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item">
+                <div class="checkbox">
+                    <label class="strikethrough">Seed (optional): <input id="seed" type="text" /></label>
+                </div>
+            </li>
+            <li class="list-group-item">
+                <div class="checkbox">
+                    <label><button onclick="seed_check()">Generate!</button></label>
+                </div>
+            </li>
+        </ul>
+    </div>
+    <script>
+        function seed_check() {
+            var seed = document.getElementById('seed');
+            if (seed.value.length == 0) {
+                location = "/seed";
+            } else {
+                location = "/seed/" + seed.value;
+            }
+        }
+    </script>
+</body>
+</html>
