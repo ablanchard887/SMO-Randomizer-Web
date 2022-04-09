@@ -1,5 +1,6 @@
 import json
 import random
+from settings import Settings
 
 with open('moons.json') as moon_file:
     moons = json.load(moon_file)['results']
@@ -19,6 +20,13 @@ def randomize(min : int, max : int) -> str:
     return moons[value]
 
 
+def allow_moon(moon : int, settings : Settings) -> int:
+    for x in settings.overrides:
+        if x['moon'] == moon:
+            return x['override']
+    return None
+
+
 def generatestory(min : int, max : int, collectedMoons : list) -> str:
     while True:
         value = rand(min, max)
@@ -27,15 +35,33 @@ def generatestory(min : int, max : int, collectedMoons : list) -> str:
             return moons[value]["name"]
 
 
-def generate(min : int, max : int, prerequisite : int, amount : int, collectedMoons : list) -> list:
+def generate(min : int, max : int, prerequisite : int, amount : int, collectedMoons : list, settings : Settings) -> list:
     i = 0
     return_list = []
     while i < amount:
         x = randomize(min, max)
-        """
-        if str(x['id']) in overrideArray:
-            if settings.getboolean('Overrides', str(x['id'])):
-                if (x["moonPrerequisites"] is None or x["moonPrerequisites"][0]["id"] <= prerequisite) and (
+        override_check = allow_moon(x['id'], settings)
+        if override_check is None:
+            if (x["moonPrerequisites"] is None or x["moonPrerequisites"][0]["id"] <= prerequisite) and (
+                    x["moonTypes"] is None or x["moonTypes"][0]["name"] != "Warp Painting") and (
+                    x["isPostGame"] is not True) and (x["requiresRevisit"] is not True) and (
+                    x["isStoryMoon"] is not True) and (x["moonTypes"] is None or (
+                    x["moonTypes"][0]["name"] != "Hint Art" and x["moonTypes"][0]["name"] != "Tourist")) and (
+                    x["id"] not in collectedMoons):
+                trait = ""
+                if x["id"] in coin_moons:
+                    trait += " [100 Coins] "
+                if x["id"] in deep_woods:
+                    trait += " [Deep Woods] "
+                if x["id"] in purple_moons:
+                    trait += " [Outfit Moon] "
+                if x["id"] == 339:
+                    trait += " [500 Coins] "
+                return_list.append(x['name'])
+                collectedMoons.append(x["id"])
+                i += 1
+        elif override_check is True:
+            if (x["moonPrerequisites"] is None or x["moonPrerequisites"][0]["id"] <= prerequisite) and (
                         x["id"] not in collectedMoons):
                     trait = ""
                     if x["id"] in coin_moons:
@@ -46,45 +72,23 @@ def generate(min : int, max : int, prerequisite : int, amount : int, collectedMo
                         trait += " [Outfit Moon] "
                     if x["id"] == 339:
                         trait += " [500 Coins] "
-                    randomizer.write(x["name"] + trait + "\n")
-                    htmlrandomizer.write(checkbox_generate(x["name"] + "<b>" + trait + "</b>"))
+                    return_list.append(x['name'])
                     collectedMoons.append(x["id"])
                     i += 1
-            else:
-                collectedMoons.append(x["id"])
-        """
-        if (x["moonPrerequisites"] is None or x["moonPrerequisites"][0]["id"] <= prerequisite) and (
-                x["moonTypes"] is None or x["moonTypes"][0]["name"] != "Warp Painting") and (
-                x["isPostGame"] is not True) and (x["requiresRevisit"] is not True) and (
-                x["isStoryMoon"] is not True) and (x["moonTypes"] is None or (
-                x["moonTypes"][0]["name"] != "Hint Art" and x["moonTypes"][0]["name"] != "Tourist")) and (
-                x["id"] not in collectedMoons):
-            trait = ""
-            if x["id"] in coin_moons:
-                trait += " [100 Coins] "
-            if x["id"] in deep_woods:
-                trait += " [Deep Woods] "
-            if x["id"] in purple_moons:
-                trait += " [Outfit Moon] "
-            if x["id"] == 339:
-                trait += " [500 Coins] "
-            return_list.append(x['name'])
-            collectedMoons.append(x["id"])
-            i += 1
     return return_list
 
 
-def generate_page(seed : int, settings : dict) -> str:
+def generate_page(seed : int, settings : Settings) -> str:
     random.seed(seed)
-    bowserSprinkle = True # Temp
-    peaceSkips = True # Temp
+    bowserSprinkle = settings.bowser_sprinkle
+    peaceSkips = settings.peace_skips
     output = []
     collectedmoons = []
 
     # Cascade
     cascade_moon_list = [moons[135]["name"], moons[136]["name"]]
 
-    output.append({"kingdom": "Cascade", "moons": cascade_moon_list + generate(135, 174, 137, 1, collectedmoons)})
+    output.append({"kingdom": "Cascade", "moons": cascade_moon_list + generate(135, 174, 137, 1, collectedmoons, settings)})
     #
 
     # Sand
@@ -94,7 +98,7 @@ def generate_page(seed : int, settings : dict) -> str:
     local = rand(0, 16)
     moonCount += local
 
-    sand_moon_list += generate(175, 263, 0, local, collectedmoons)
+    sand_moon_list += generate(175, 263, 0, local, collectedmoons, settings)
     if moonCount < 16:
         sand_moon_list.append(moons[175]["name"])
         moonCount += 1
@@ -102,7 +106,7 @@ def generate_page(seed : int, settings : dict) -> str:
         local = rand(0, 16 - moonCount)
         moonCount += local
 
-        sand_moon_list += generate(175, 263, 176, local, collectedmoons)
+        sand_moon_list += generate(175, 263, 176, local, collectedmoons, settings)
     
     if not peaceSkips:
         if moonCount < 16:
@@ -112,7 +116,7 @@ def generate_page(seed : int, settings : dict) -> str:
             local = rand(0, 16 - moonCount)
             moonCount += local
 
-            sand_moon_list += generate(175, 263, 177, local, collectedmoons)
+            sand_moon_list += generate(175, 263, 177, local, collectedmoons, settings)
 
             if moonCount < 14:
                 sand_moon_list.append(moons[177]["name"])
@@ -121,18 +125,18 @@ def generate_page(seed : int, settings : dict) -> str:
                 local = rand(0, 16 - moonCount)
                 moonCount += local
 
-                sand_moon_list += generate(175, 263, 178, local, collectedmoons)
+                sand_moon_list += generate(175, 263, 178, local, collectedmoons, settings)
 
                 if moonCount < 14:
                     sand_moon_list.append(moons[178]["name"])
                     moonCount += 3
 
-                    sand_moon_list += generate(175, 263, 179, 16 - moonCount, collectedmoons)
+                    sand_moon_list += generate(175, 263, 179, 16 - moonCount, collectedmoons, settings)
                 elif 16 > moonCount >= 14:
-                    sand_moon_list += generate(175, 263, 177, 16 - moonCount, collectedmoons)
+                    sand_moon_list += generate(175, 263, 177, 16 - moonCount, collectedmoons, settings)
 
             elif 16 > moonCount >= 14:
-                sand_moon_list += generate(175, 263, 177, 16 - moonCount, collectedmoons)
+                sand_moon_list += generate(175, 263, 177, 16 - moonCount, collectedmoons, settings)
     else:
         if moonCount < 14:
             sand_moon_list.append(moons[177]["name"])
@@ -141,18 +145,18 @@ def generate_page(seed : int, settings : dict) -> str:
             local = rand(0, 16 - moonCount)
             moonCount += local
 
-            sand_moon_list += generate(175, 263, 178, local, collectedmoons)
+            sand_moon_list += generate(175, 263, 178, local, collectedmoons, settings)
 
             if moonCount < 14:
                 sand_moon_list.append(moons[178]["name"])
                 moonCount += 3
 
-                sand_moon_list += generate(175, 263, 179, 16 - moonCount, collectedmoons)
+                sand_moon_list += generate(175, 263, 179, 16 - moonCount, collectedmoons, settings)
             elif 16 > moonCount >= 14:
-                sand_moon_list += generate(175, 263, 177, 16 - moonCount, collectedmoons)
+                sand_moon_list += generate(175, 263, 177, 16 - moonCount, collectedmoons, settings)
 
         elif 16 > moonCount >= 14:
-            sand_moon_list += generate(175, 263, 177, 16 - moonCount, collectedmoons)
+            sand_moon_list += generate(175, 263, 177, 16 - moonCount, collectedmoons, settings)
     output.append({"kingdom": "Sand", "moons": sand_moon_list})
     #
 
@@ -163,15 +167,15 @@ def generate_page(seed : int, settings : dict) -> str:
     local = rand(0, 8)
     moonCount += local
 
-    lake_moon_list += generate(264, 305, 0, local, collectedmoons)
+    lake_moon_list += generate(264, 305, 0, local, collectedmoons, settings)
 
     if moonCount < 6:
         lake_moon_list.append(moons[264]["name"])
         moonCount += 3
 
-        lake_moon_list += generate(264, 305, 265, 8 - moonCount, collectedmoons)
+        lake_moon_list += generate(264, 305, 265, 8 - moonCount, collectedmoons, settings)
     elif 8 > moonCount >= 6:
-        lake_moon_list += generate(264, 305, 0, 8 - moonCount, collectedmoons)
+        lake_moon_list += generate(264, 305, 0, 8 - moonCount, collectedmoons, settings)
     output.append({"kingdom": "Lake", "moons": lake_moon_list})
     #
     
@@ -182,7 +186,7 @@ def generate_page(seed : int, settings : dict) -> str:
     local = rand(0, 16)
     moonCount += local
 
-    wooded_moon_list += generate(306, 381, 0, local, collectedmoons)
+    wooded_moon_list += generate(306, 381, 0, local, collectedmoons, settings)
 
     if moonCount < 16:
         wooded_moon_list.append(moons[306]["name"])
@@ -191,7 +195,7 @@ def generate_page(seed : int, settings : dict) -> str:
         local = rand(0, 16 - moonCount)
         moonCount += local
 
-        wooded_moon_list += generate(306, 381, 307, local, collectedmoons)
+        wooded_moon_list += generate(306, 381, 307, local, collectedmoons, settings)
 
         if moonCount < 14:
             wooded_moon_list.append(moons[307]["name"])
@@ -200,7 +204,7 @@ def generate_page(seed : int, settings : dict) -> str:
             local = rand(0, 16 - moonCount)
             moonCount += local
 
-            wooded_moon_list += generate(306, 381, 308, local, collectedmoons)
+            wooded_moon_list += generate(306, 381, 308, local, collectedmoons, settings)
 
             if moonCount < 16:
                 wooded_moon_list.append(moons[308]["name"])
@@ -209,22 +213,22 @@ def generate_page(seed : int, settings : dict) -> str:
                 local = rand(0, 16 - moonCount)
                 moonCount += local
 
-                wooded_moon_list += generate(306, 381, 309, local, collectedmoons)
+                wooded_moon_list += generate(306, 381, 309, local, collectedmoons, settings)
 
                 if moonCount < 14:
                     wooded_moon_list.append(moons[309]["name"])
                     moonCount += 3
 
-                    wooded_moon_list += generate(306, 381, 310, 16 - moonCount, collectedmoons)
+                    wooded_moon_list += generate(306, 381, 310, 16 - moonCount, collectedmoons, settings)
                 elif 16 > moonCount >= 14:
-                    wooded_moon_list += generate(306, 381, 309, 16 - moonCount, collectedmoons)
+                    wooded_moon_list += generate(306, 381, 309, 16 - moonCount, collectedmoons, settings)
         elif 16 > moonCount >= 14:
-            wooded_moon_list += generate(306, 381, 307, 16 - moonCount, collectedmoons)
+            wooded_moon_list += generate(306, 381, 307, 16 - moonCount, collectedmoons, settings)
     output.append({"kingdom": "Wooded", "moons": wooded_moon_list})
     #
 
     # Lost
-    output.append({"kingdom": "Lost", "moons": generate(391, 425, 0, 10, collectedmoons)})
+    output.append({"kingdom": "Lost", "moons": generate(391, 425, 0, 10, collectedmoons, settings)})
     #
 
     # Metro
@@ -234,7 +238,7 @@ def generate_page(seed : int, settings : dict) -> str:
     local = rand(0, 20 - moonCount)
     moonCount += local
 
-    generate(426, 506, 427, local, collectedmoons)
+    generate(426, 506, 427, local, collectedmoons, settings)
 
     if moonCount < 20:
         metro_moon_list.append(generatestory(427, 430, collectedmoons))
@@ -243,7 +247,7 @@ def generate_page(seed : int, settings : dict) -> str:
         local = rand(0, 20 - moonCount)
         moonCount += local
 
-        metro_moon_list += generate(426, 506, 427, local, collectedmoons)
+        metro_moon_list += generate(426, 506, 427, local, collectedmoons, settings)
 
         if moonCount < 20:
             story = generatestory(427, 430, collectedmoons)
@@ -253,7 +257,7 @@ def generate_page(seed : int, settings : dict) -> str:
             local = rand(0, 20 - moonCount)
             moonCount += local
 
-            metro_moon_list += generate(426, 506, 427, local, collectedmoons)
+            metro_moon_list += generate(426, 506, 427, local, collectedmoons, settings)
 
             if moonCount < 20:
                 story = generatestory(427, 430, collectedmoons)
@@ -263,7 +267,7 @@ def generate_page(seed : int, settings : dict) -> str:
                 local = rand(0, 20 - moonCount)
                 moonCount += local
 
-                metro_moon_list += generate(426, 506, 427, local, collectedmoons)
+                metro_moon_list += generate(426, 506, 427, local, collectedmoons, settings)
 
                 if moonCount < 20:
                     story = generatestory(427, 430, collectedmoons)
@@ -273,7 +277,7 @@ def generate_page(seed : int, settings : dict) -> str:
                     local = rand(0, 20 - moonCount)
                     moonCount += local
 
-                    metro_moon_list += generate(426, 506, 428, local, collectedmoons)
+                    metro_moon_list += generate(426, 506, 428, local, collectedmoons, settings)
 
                     if moonCount < 20:
                         metro_moon_list.append(moons[431]["name"])
@@ -282,15 +286,15 @@ def generate_page(seed : int, settings : dict) -> str:
                         local = rand(0, 20 - moonCount)
                         moonCount += local
 
-                        metro_moon_list += generate(426, 506, 432, local, collectedmoons)
+                        metro_moon_list += generate(426, 506, 432, local, collectedmoons, settings)
 
                         if moonCount < 18:
                             metro_moon_list.append(moons[432]["name"])
                             moonCount += 3
 
-                            metro_moon_list += generate(426, 506, 433, 20 - moonCount, collectedmoons)
+                            metro_moon_list += generate(426, 506, 433, 20 - moonCount, collectedmoons, settings)
                         elif 20 > moonCount >= 18:
-                            metro_moon_list += generate(426, 506, 432, 20 - moonCount, collectedmoons)
+                            metro_moon_list += generate(426, 506, 432, 20 - moonCount, collectedmoons, settings)
     output.append({"kingdom": "Metro", "moons": metro_moon_list})
     #
 
@@ -301,7 +305,7 @@ def generate_page(seed : int, settings : dict) -> str:
     local = rand(0, 10)
     moonCount += local
 
-    snow_moon_list += generate(507, 561, 0, local, collectedmoons)
+    snow_moon_list += generate(507, 561, 0, local, collectedmoons, settings)
 
     if not peaceSkips:
         if moonCount < 10:
@@ -312,7 +316,7 @@ def generate_page(seed : int, settings : dict) -> str:
             local = rand(0, 10 - moonCount)
             moonCount += local
 
-            snow_moon_list += generate(507, 561, 0, local, collectedmoons)
+            snow_moon_list += generate(507, 561, 0, local, collectedmoons, settings)
 
             if moonCount < 10:
                 story = generatestory(507, 510, collectedmoons)
@@ -322,7 +326,7 @@ def generate_page(seed : int, settings : dict) -> str:
                 local = rand(0, 10 - moonCount)
                 moonCount += local
 
-                snow_moon_list += generate(507, 561, 0, local, collectedmoons)
+                snow_moon_list += generate(507, 561, 0, local, collectedmoons, settings)
 
                 if moonCount < 10:
                     story = generatestory(507, 510, collectedmoons)
@@ -332,7 +336,7 @@ def generate_page(seed : int, settings : dict) -> str:
                     local = rand(0, 10 - moonCount)
                     moonCount += local
 
-                    snow_moon_list += generate(507, 561, 0, local, collectedmoons)
+                    snow_moon_list += generate(507, 561, 0, local, collectedmoons, settings)
 
                     if moonCount < 10:
                         story = generatestory(507, 510, collectedmoons)
@@ -342,23 +346,23 @@ def generate_page(seed : int, settings : dict) -> str:
                         local = rand(0, 10 - moonCount)
                         moonCount += local
 
-                        snow_moon_list += generate(507, 561, 0, local, collectedmoons)
+                        snow_moon_list += generate(507, 561, 0, local, collectedmoons, settings)
 
                         if moonCount < 8:
                             snow_moon_list.append(moons[511]["name"])
                             moonCount += 3
 
-                            snow_moon_list += generate(507, 561, 512, 10 - moonCount, collectedmoons)
+                            snow_moon_list += generate(507, 561, 512, 10 - moonCount, collectedmoons, settings)
                         elif 10 > moonCount >= 8:
-                            snow_moon_list += generate(507, 561, 0, 10 - moonCount, collectedmoons)
+                            snow_moon_list += generate(507, 561, 0, 10 - moonCount, collectedmoons, settings)
     else:
         if moonCount < 8:
             snow_moon_list.append(moons[511]["name"])
             moonCount += 3
 
-            snow_moon_list += generate(507, 561, 512, 10 - moonCount, collectedmoons)
+            snow_moon_list += generate(507, 561, 512, 10 - moonCount, collectedmoons, settings)
         elif 10 > moonCount >= 8:
-            snow_moon_list += generate(507, 561, 0, 10 - moonCount, collectedmoons)
+            snow_moon_list += generate(507, 561, 0, 10 - moonCount, collectedmoons, settings)
     output.append({"kingdom": "Snow", "moons": snow_moon_list})
     #
     
@@ -369,7 +373,7 @@ def generate_page(seed : int, settings : dict) -> str:
     local = rand(0, 10)
     moonCount += local
 
-    seaside_moon_list += generate(562, 632, 0, local, collectedmoons)
+    seaside_moon_list += generate(562, 632, 0, local, collectedmoons, settings)
 
     if moonCount < 10:
         story = generatestory(562, 565, collectedmoons)
@@ -379,7 +383,7 @@ def generate_page(seed : int, settings : dict) -> str:
         local = rand(0, 10 - moonCount)
         moonCount += local
 
-        seaside_moon_list += generate(562, 632, 0, local, collectedmoons)
+        seaside_moon_list += generate(562, 632, 0, local, collectedmoons, settings)
 
         if moonCount < 10:
             story = generatestory(562, 565, collectedmoons)
@@ -389,7 +393,7 @@ def generate_page(seed : int, settings : dict) -> str:
             local = rand(0, 10 - moonCount)
             moonCount += local
 
-            seaside_moon_list += generate(562, 632, 0, local, collectedmoons)
+            seaside_moon_list += generate(562, 632, 0, local, collectedmoons, settings)
 
             if moonCount < 10:
                 story = generatestory(562, 565, collectedmoons)
@@ -399,7 +403,7 @@ def generate_page(seed : int, settings : dict) -> str:
                 local = rand(0, 10 - moonCount)
                 moonCount += local
 
-                seaside_moon_list += generate(562, 632, 0, local, collectedmoons)
+                seaside_moon_list += generate(562, 632, 0, local, collectedmoons, settings)
 
                 if moonCount < 10:
                     story = generatestory(562, 565, collectedmoons)
@@ -409,15 +413,15 @@ def generate_page(seed : int, settings : dict) -> str:
                     local = rand(0, 10 - moonCount)
                     moonCount += local
 
-                    seaside_moon_list += generate(562, 632, 0, local, collectedmoons)
+                    seaside_moon_list += generate(562, 632, 0, local, collectedmoons, settings)
 
                     if moonCount < 8:
                         seaside_moon_list.append(moons[566]["name"])
                         moonCount += 3
 
-                        seaside_moon_list += generate(562, 632, 567, 10 - moonCount, collectedmoons)
+                        seaside_moon_list += generate(562, 632, 567, 10 - moonCount, collectedmoons, settings)
                     elif 10 > moonCount >= 8:
-                        seaside_moon_list += generate(562, 632, 0, 10 - moonCount, collectedmoons)
+                        seaside_moon_list += generate(562, 632, 0, 10 - moonCount, collectedmoons, settings)
     output.append({"kingdom": "Seaside", "moons": seaside_moon_list})
     #
 
@@ -428,7 +432,7 @@ def generate_page(seed : int, settings : dict) -> str:
     local = rand(0, 15)
     moonCount += local
 
-    luncheon_moon_list += generate(633, 700, 634, local, collectedmoons)
+    luncheon_moon_list += generate(633, 700, 634, local, collectedmoons, settings)
 
     if moonCount < 18:
         luncheon_moon_list.append(moons[634]["name"])
@@ -437,7 +441,7 @@ def generate_page(seed : int, settings : dict) -> str:
         local = rand(0, 18 - moonCount)
         moonCount += local
 
-        luncheon_moon_list += generate(633, 700, 635, local, collectedmoons)
+        luncheon_moon_list += generate(633, 700, 635, local, collectedmoons, settings)
 
         if moonCount < 16:
             luncheon_moon_list.append(moons[635]["name"])
@@ -446,7 +450,7 @@ def generate_page(seed : int, settings : dict) -> str:
             local = rand(0, 18 - moonCount)
             moonCount += local
 
-            luncheon_moon_list += generate(633, 700, 636, local, collectedmoons)
+            luncheon_moon_list += generate(633, 700, 636, local, collectedmoons, settings)
 
             if moonCount < 18:
                 luncheon_moon_list.append(moons[636]["name"])
@@ -455,18 +459,18 @@ def generate_page(seed : int, settings : dict) -> str:
                 local = rand(0, 18 - moonCount)
                 moonCount += local
 
-                luncheon_moon_list += generate(633, 700, 637, local, collectedmoons)
+                luncheon_moon_list += generate(633, 700, 637, local, collectedmoons, settings)
 
                 if moonCount < 16:
                     luncheon_moon_list.append(moons[637]["name"])
                     moonCount += 3
 
-                    luncheon_moon_list += generate(633, 700, 638, 18 - moonCount, collectedmoons)
+                    luncheon_moon_list += generate(633, 700, 638, 18 - moonCount, collectedmoons, settings)
 
                 elif 18 > moonCount >= 16:
-                    luncheon_moon_list += generate(633, 700, 637, 18 - moonCount, collectedmoons)
+                    luncheon_moon_list += generate(633, 700, 637, 18 - moonCount, collectedmoons, settings)
         elif 18 > moonCount >= 16:
-            luncheon_moon_list += generate(633, 700, 635, 18 - moonCount, collectedmoons)
+            luncheon_moon_list += generate(633, 700, 635, 18 - moonCount, collectedmoons, settings)
     output.append({"kingdom": "Luncheon", "moons": luncheon_moon_list})
     #
 
@@ -478,7 +482,7 @@ def generate_page(seed : int, settings : dict) -> str:
     if bowserSprinkle:
         sprinkleID = 714
 
-    bowsers_moon_list += generate(711, 772, sprinkleID, 8 - moonCount, collectedmoons)
+    bowsers_moon_list += generate(711, 772, sprinkleID, 8 - moonCount, collectedmoons, settings)
     output.append({"kingdom": "Bowser's", "moons": bowsers_moon_list})
     #
 

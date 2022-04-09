@@ -1,4 +1,5 @@
-from flask import Flask, render_template, redirect
+from flask import Flask, render_template, redirect, request
+from settings import parse_form, decode_settings, Settings
 from randomizer import generate_page
 import secrets
 
@@ -15,16 +16,26 @@ def utility_processor():
     return dict(get_number=get_number)
 
 
-@app.route("/")
+@app.route("/", methods=["POST", "GET"])
 def home():
+    if request.method == "POST":
+        settings = parse_form(request.form)
+        if len(request.form['seed']) > 0:
+            return redirect("/seed/" + str(request.form['seed']) + "?settings=" + str(settings))
+        else:
+            return redirect("/seed?settings=" + str(settings))
     return render_template('index.html')
 
 
 @app.route("/seed")
 @app.route("/seed/")
 def get_seed():
+    settings = request.args.get('settings')
     seed = secrets.token_hex(4)
-    return redirect("/seed/" + seed)
+    if settings is None:
+        return redirect("/seed/" + seed)
+    else:
+        return redirect("/seed/" + seed + "?settings=" + settings)
 
 
 @app.route("/seed/<seed>")
@@ -36,5 +47,10 @@ def randomizer(seed : int):
             seed_value = int(seed, 16)
         except ValueError:
             return "Seed can only contain hex."
+    settings = request.args.get('settings')
+    if settings is not None:
+        settings_class = decode_settings(settings)
+    else:
+        settings_class = Settings()
 
-    return render_template('randomizer.html', seed=seed, moons=generate_page(seed_value, {}))
+    return render_template('randomizer.html', seed=seed, moons=generate_page(seed_value, settings_class))

@@ -8,18 +8,31 @@
 <body>
     <div class="card">
         <div class="card-header">SMO-Randomizer (now online)</div>
-        <ul class="list-group list-group-flush">
-            <li class="list-group-item">
-                <div class="checkbox">
-                    <label class="strikethrough">Seed (optional): <input id="seed" type="text" /></label>
-                </div>
-            </li>
-            <li class="list-group-item">
-                <div class="checkbox">
-                    <label><button onclick="seed_check()">Generate!</button></label>
-                </div>
-            </li>
-        </ul>
+        <form action="" method="POST">
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item">
+                    <div class="checkbox">
+                        <label class="strikethrough">Seed (optional): <input id="seed" name="seed" type="text" /></label>
+                    </div>
+                </li>
+                <li class="list-group-item">
+                    <div class="checkbox">
+                        <label><textarea placeholder="Allowlist" name="allowlist"></textarea><textarea placeholder="Blocklist" name="blocklist"></textarea></label>
+                    </div>
+                </li>
+                <li class="list-group-item">
+                    <div class="checkbox">
+                        <label>End Bowser's After Story <input type="checkbox" name="sprinkle"/></label>
+                        <label>Common Peace Skips <input type="checkbox" name="peaceskips"/></label>
+                    </div>
+                </li>
+                <li class="list-group-item">
+                    <div class="checkbox">
+                        <label><input type="submit" value="Generate!" /></label>
+                    </div>
+                </li>
+            </ul>
+        </form>
     </div>
     <script>
         function seed_check() {
