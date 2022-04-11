@@ -1,3 +1,21 @@
+/*
+@media (prefers-color-scheme: dark) {
+    :root {
+        color-scheme: dark;
+        background-color: black;
+        color: white;
+    }
+    .card-header {
+        background-color: black;
+        color: white;
+    }
+    .list-group-item {
+        background-color: black;
+        color: white;
+    }
+}
+*/
+
 label.strikethrough {
     line-height: 0.3;
     font-size: 15px;

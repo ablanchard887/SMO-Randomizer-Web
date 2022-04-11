@@ -11,9 +11,9 @@
         <div class="card-header">{{x['kingdom']}}</div>
         <ul class="list-group list-group-flush">
             {% for y in x['moons'] %}
-            <li class="list-group-item" onclick="clicked({{get_number(y)}})">
+            <li class="list-group-item" onclick="clicked({{get_number(y['name'])}})">
                 <div class="checkbox">
-                    <label class="strikethrough" id="{{get_number(y)}}">{{y}}</label>
+                    <label class="strikethrough" id="{{get_number(y['name'])}}">{{y['name']}} <b>{{y['trait']}}</b></label>
                 </div>
             </li>
             {% endfor %}
