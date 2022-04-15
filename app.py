@@ -1,6 +1,6 @@
 from flask import Flask, render_template, redirect, request
 from settings import parse_form, decode_settings, Settings
-from randomizer import generate_page
+from randomizer import generate_page, talkatoo
 import secrets
 
 app = Flask(__name__)
@@ -51,6 +51,34 @@ def randomizer(seed : int):
     if settings is not None:
         settings_class = decode_settings(settings)
     else:
-        settings_class = Settings()
+        return redirect("/seed/" + seed + "?settings=" + str(Settings()))
+
+    return render_template('randomizer.html', seed=seed, moons=generate_page(seed_value, settings_class))
+
+
+@app.route("/getcard")
+def get_card():
+    kingdom = request.args.get("kingdom")
+    collectedMoons = request.args.get("collected").split(",")
+    settings = request.args.get('settings')
+    prerequisite = request.args.get('prerequisite')
+
+    return talkatoo(kingdom, collectedMoons, decode_settings(settings), prerequisite)
+
+
+@app.route("/card/<seed>")
+def card(seed : int):
+    if len(seed) != 8:
+        return "Invalid seed length."
+    else:
+        try:
+            seed_value = int(seed, 16)
+        except ValueError:
+            return "Seed can only contain hex."
+    settings = request.args.get('settings')
+    if settings is not None:
+        settings_class = decode_settings(settings)
+    else:
+        return redirect("/card/" + seed + "?settings=" + str(Settings()))
 
     return render_template('randomizer.html', seed=seed, moons=generate_page(seed_value, settings_class))
