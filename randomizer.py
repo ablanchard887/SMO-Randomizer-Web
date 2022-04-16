@@ -1,15 +1,7 @@
-import json
 import random
 from settings import Settings
+from global_vars import *
 from generate_list import get_moon_json
-
-with open('moons.json') as moon_file:
-    moons = json.load(moon_file)['results']
-    moon_file.close()
-
-coin_moons = [217, 283, 329, 412, 453, 528, 598, 658, 740]
-purple_moons = [228, 285, 342, 465, 466, 536, 537, 604, 660, 661, 742, 743]
-deep_woods = list(range(334, 343))
 
 
 def rand(min : int, max : int) -> int:
@@ -18,7 +10,7 @@ def rand(min : int, max : int) -> int:
 
 def randomize(min : int, max : int) -> str:
     value = rand(min, max)
-    return moons[value]
+    return MOONS[value]
 
 
 def allow_moon(moon : int, settings : Settings) -> int:
@@ -31,9 +23,9 @@ def allow_moon(moon : int, settings : Settings) -> int:
 def generatestory(min : int, max : int, collectedMoons : list) -> str:
     while True:
         value = rand(min, max)
-        if moons[value]["id"] not in collectedMoons:
-            collectedMoons.append(moons[value]["id"])
-            return {"name": moons[value]["name"], "trait": " [Story] "}
+        if MOONS[value]["id"] not in collectedMoons:
+            collectedMoons.append(MOONS[value]["id"])
+            return {"name": MOONS[value]["name"], "trait": " [Story] "}
 
 
 def generate(min : int, max : int, prerequisite : int, amount : int, collectedMoons : list, settings : Settings) -> list:
@@ -50,11 +42,11 @@ def generate(min : int, max : int, prerequisite : int, amount : int, collectedMo
                     x["moonTypes"][0]["name"] != "Hint Art" and x["moonTypes"][0]["name"] != "Tourist")) and (
                     x["id"] not in collectedMoons):
                 trait = ""
-                if x["id"] in coin_moons:
+                if x["id"] in COIN_MOONS:
                     trait += " [100 Coins] "
-                if x["id"] in deep_woods:
+                if x["id"] in DEEP_WOODS:
                     trait += " [Deep Woods] "
-                if x["id"] in purple_moons:
+                if x["id"] in PURPLE_MOONS:
                     trait += " [Outfit Moon] "
                 if x["id"] == 339:
                     trait += " [500 Coins] "
@@ -65,11 +57,11 @@ def generate(min : int, max : int, prerequisite : int, amount : int, collectedMo
             if (x["moonPrerequisites"] is None or x["moonPrerequisites"][0]["id"] <= prerequisite) and (
                         x["id"] not in collectedMoons):
                     trait = ""
-                    if x["id"] in coin_moons:
+                    if x["id"] in COIN_MOONS:
                         trait += " [100 Coins] "
-                    if x["id"] in deep_woods:
+                    if x["id"] in DEEP_WOODS:
                         trait += " [Deep Woods] "
-                    if x["id"] in purple_moons:
+                    if x["id"] in PURPLE_MOONS:
                         trait += " [Outfit Moon] "
                     if x["id"] == 339:
                         trait += " [500 Coins] "
@@ -81,7 +73,7 @@ def generate(min : int, max : int, prerequisite : int, amount : int, collectedMo
 
 def talkatoo(seed : int, settings : Settings) -> dict:
     random.seed(seed)
-    output = get_moon_json()
+    output = get_moon_json(settings)
     for x in output:
         random.shuffle(x['moons'])
     return output
@@ -95,7 +87,7 @@ def generate_page(seed : int, settings : Settings) -> list:
     collectedmoons = []
 
     # Cascade
-    cascade_moon_list = [{"name": moons[135]["name"], "trait": " [Story] "}, {"name": moons[136]["name"], "trait": " [Story] "}]
+    cascade_moon_list = [{"name": MOONS[135]["name"], "trait": " [Story] "}, {"name": MOONS[136]["name"], "trait": " [Story] "}]
 
     output.append({"kingdom": "Cascade", "moons": cascade_moon_list + generate(135, 174, 137, 1, collectedmoons, settings)})
     #
@@ -111,7 +103,7 @@ def generate_page(seed : int, settings : Settings) -> list:
     
     if not peaceSkips:
         if moonCount < 16:
-            sand_moon_list.append({"name": moons[175]["name"], "trait": " [Story] "})
+            sand_moon_list.append({"name": MOONS[175]["name"], "trait": " [Story] "})
             moonCount += 1
 
             local = rand(0, 16 - moonCount)
@@ -119,7 +111,7 @@ def generate_page(seed : int, settings : Settings) -> list:
 
             sand_moon_list += generate(175, 263, 176, local, collectedmoons, settings)
             if moonCount < 16:
-                sand_moon_list.append({"name": moons[176]["name"], "trait": " [Story] "})
+                sand_moon_list.append({"name": MOONS[176]["name"], "trait": " [Story] "})
                 moonCount += 1
 
                 local = rand(0, 16 - moonCount)
@@ -128,7 +120,7 @@ def generate_page(seed : int, settings : Settings) -> list:
                 sand_moon_list += generate(175, 263, 177, local, collectedmoons, settings)
 
                 if moonCount < 14:
-                    sand_moon_list.append({"name": moons[177]["name"], "trait": " [Story] "})
+                    sand_moon_list.append({"name": MOONS[177]["name"], "trait": " [Story] "})
                     moonCount += 3
 
                     local = rand(0, 16 - moonCount)
@@ -137,7 +129,7 @@ def generate_page(seed : int, settings : Settings) -> list:
                     sand_moon_list += generate(175, 263, 178, local, collectedmoons, settings)
 
                     if moonCount < 14:
-                        sand_moon_list.append({"name": moons[178]["name"], "trait": " [Story] "})
+                        sand_moon_list.append({"name": MOONS[178]["name"], "trait": " [Story] "})
                         moonCount += 3
 
                         sand_moon_list += generate(175, 263, 179, 16 - moonCount, collectedmoons, settings)
@@ -148,7 +140,7 @@ def generate_page(seed : int, settings : Settings) -> list:
                     sand_moon_list += generate(175, 263, 177, 16 - moonCount, collectedmoons, settings)
     else:
         if moonCount < 14:
-            sand_moon_list.append({"name": moons[177]["name"], "trait": " [Story] "})
+            sand_moon_list.append({"name": MOONS[177]["name"], "trait": " [Story] "})
             moonCount += 3
 
             local = rand(0, 16 - moonCount)
@@ -157,7 +149,7 @@ def generate_page(seed : int, settings : Settings) -> list:
             sand_moon_list += generate(175, 263, 178, local, collectedmoons, settings)
 
             if moonCount < 14:
-                sand_moon_list.append({"name": moons[178]["name"], "trait": " [Story] "})
+                sand_moon_list.append({"name": MOONS[178]["name"], "trait": " [Story] "})
                 moonCount += 3
 
                 sand_moon_list += generate(175, 263, 179, 16 - moonCount, collectedmoons, settings)
@@ -179,7 +171,7 @@ def generate_page(seed : int, settings : Settings) -> list:
     lake_moon_list += generate(264, 305, 0, local, collectedmoons, settings)
 
     if moonCount < 6:
-        lake_moon_list.append({"name": moons[264]["name"], "trait": " [Story] "})
+        lake_moon_list.append({"name": MOONS[264]["name"], "trait": " [Story] "})
         moonCount += 3
 
         lake_moon_list += generate(264, 305, 265, 8 - moonCount, collectedmoons, settings)
@@ -198,7 +190,7 @@ def generate_page(seed : int, settings : Settings) -> list:
     wooded_moon_list += generate(306, 381, 0, local, collectedmoons, settings)
 
     if moonCount < 16:
-        wooded_moon_list.append({"name": moons[306]["name"], "trait": " [Story] "})
+        wooded_moon_list.append({"name": MOONS[306]["name"], "trait": " [Story] "})
         moonCount += 1
 
         local = rand(0, 16 - moonCount)
@@ -207,7 +199,7 @@ def generate_page(seed : int, settings : Settings) -> list:
         wooded_moon_list += generate(306, 381, 307, local, collectedmoons, settings)
 
         if moonCount < 14:
-            wooded_moon_list.append({"name": moons[307]["name"], "trait": " [Story] "})
+            wooded_moon_list.append({"name": MOONS[307]["name"], "trait": " [Story] "})
             moonCount += 3
 
             local = rand(0, 16 - moonCount)
@@ -216,7 +208,7 @@ def generate_page(seed : int, settings : Settings) -> list:
             wooded_moon_list += generate(306, 381, 308, local, collectedmoons, settings)
 
             if moonCount < 16:
-                wooded_moon_list.append({"name": moons[308]["name"], "trait": " [Story] "})
+                wooded_moon_list.append({"name": MOONS[308]["name"], "trait": " [Story] "})
                 moonCount += 1
 
                 local = rand(0, 16 - moonCount)
@@ -225,7 +217,7 @@ def generate_page(seed : int, settings : Settings) -> list:
                 wooded_moon_list += generate(306, 381, 309, local, collectedmoons, settings)
 
                 if moonCount < 14:
-                    wooded_moon_list.append({"name": moons[309]["name"], "trait": " [Story] "})
+                    wooded_moon_list.append({"name": MOONS[309]["name"], "trait": " [Story] "})
                     moonCount += 3
 
                     wooded_moon_list += generate(306, 381, 310, 16 - moonCount, collectedmoons, settings)
@@ -242,7 +234,7 @@ def generate_page(seed : int, settings : Settings) -> list:
 
     # Metro
     moonCount = 3
-    metro_moon_list = [{"name": moons[426]["name"], "trait": " [Story] "}]
+    metro_moon_list = [{"name": MOONS[426]["name"], "trait": " [Story] "}]
 
     local = rand(0, 20 - moonCount)
     moonCount += local
@@ -289,7 +281,7 @@ def generate_page(seed : int, settings : Settings) -> list:
                     metro_moon_list += generate(426, 506, 428, local, collectedmoons, settings)
 
                     if moonCount < 20:
-                        metro_moon_list.append({"name": moons[431]["name"], "trait": " [Story] "})
+                        metro_moon_list.append({"name": MOONS[431]["name"], "trait": " [Story] "})
                         moonCount += 1
 
                         local = rand(0, 20 - moonCount)
@@ -298,7 +290,7 @@ def generate_page(seed : int, settings : Settings) -> list:
                         metro_moon_list += generate(426, 506, 432, local, collectedmoons, settings)
 
                         if moonCount < 18:
-                            metro_moon_list.append({"name": moons[432]["name"], "trait": " [Story] "})
+                            metro_moon_list.append({"name": MOONS[432]["name"], "trait": " [Story] "})
                             moonCount += 3
 
                             metro_moon_list += generate(426, 506, 433, 20 - moonCount, collectedmoons, settings)
@@ -358,7 +350,7 @@ def generate_page(seed : int, settings : Settings) -> list:
                         snow_moon_list += generate(507, 561, 0, local, collectedmoons, settings)
 
                         if moonCount < 8:
-                            snow_moon_list.append({"name": moons[511]["name"], "trait": " [Story] "})
+                            snow_moon_list.append({"name": MOONS[511]["name"], "trait": " [Story] "})
                             moonCount += 3
 
                             snow_moon_list += generate(507, 561, 512, 10 - moonCount, collectedmoons, settings)
@@ -366,7 +358,7 @@ def generate_page(seed : int, settings : Settings) -> list:
                             snow_moon_list += generate(507, 561, 0, 10 - moonCount, collectedmoons, settings)
     else:
         if moonCount < 8:
-            snow_moon_list.append({"name": moons[511]["name"], "trait": " [Story] "})
+            snow_moon_list.append({"name": MOONS[511]["name"], "trait": " [Story] "})
             moonCount += 3
 
             snow_moon_list += generate(507, 561, 512, 10 - moonCount, collectedmoons, settings)
@@ -425,7 +417,7 @@ def generate_page(seed : int, settings : Settings) -> list:
                     seaside_moon_list += generate(562, 632, 0, local, collectedmoons, settings)
 
                     if moonCount < 8:
-                        seaside_moon_list.append({"name": moons[566]["name"], "trait": " [Story] "})
+                        seaside_moon_list.append({"name": MOONS[566]["name"], "trait": " [Story] "})
                         moonCount += 3
 
                         seaside_moon_list += generate(562, 632, 567, 10 - moonCount, collectedmoons, settings)
@@ -436,7 +428,7 @@ def generate_page(seed : int, settings : Settings) -> list:
 
     # Luncheon
     moonCount = 1
-    luncheon_moon_list = [{"name": moons[633]["name"], "trait": " [Story] "}]
+    luncheon_moon_list = [{"name": MOONS[633]["name"], "trait": " [Story] "}]
 
     local = rand(0, 15)
     moonCount += local
@@ -444,7 +436,7 @@ def generate_page(seed : int, settings : Settings) -> list:
     luncheon_moon_list += generate(633, 700, 634, local, collectedmoons, settings)
 
     if moonCount < 18:
-        luncheon_moon_list.append({"name": moons[634]["name"], "trait": " [Story] "})
+        luncheon_moon_list.append({"name": MOONS[634]["name"], "trait": " [Story] "})
         moonCount += 1
 
         local = rand(0, 18 - moonCount)
@@ -453,7 +445,7 @@ def generate_page(seed : int, settings : Settings) -> list:
         luncheon_moon_list += generate(633, 700, 635, local, collectedmoons, settings)
 
         if moonCount < 16:
-            luncheon_moon_list.append({"name": moons[635]["name"], "trait": " [Story] "})
+            luncheon_moon_list.append({"name": MOONS[635]["name"], "trait": " [Story] "})
             moonCount += 3
 
             local = rand(0, 18 - moonCount)
@@ -462,7 +454,7 @@ def generate_page(seed : int, settings : Settings) -> list:
             luncheon_moon_list += generate(633, 700, 636, local, collectedmoons, settings)
 
             if moonCount < 18:
-                luncheon_moon_list.append({"name": moons[636]["name"], "trait": " [Story] "})
+                luncheon_moon_list.append({"name": MOONS[636]["name"], "trait": " [Story] "})
                 moonCount += 1
 
                 local = rand(0, 18 - moonCount)
@@ -471,7 +463,7 @@ def generate_page(seed : int, settings : Settings) -> list:
                 luncheon_moon_list += generate(633, 700, 637, local, collectedmoons, settings)
 
                 if moonCount < 16:
-                    luncheon_moon_list.append({"name": moons[637]["name"], "trait": " [Story] "})
+                    luncheon_moon_list.append({"name": MOONS[637]["name"], "trait": " [Story] "})
                     moonCount += 3
 
                     luncheon_moon_list += generate(633, 700, 638, 18 - moonCount, collectedmoons, settings)
@@ -485,7 +477,7 @@ def generate_page(seed : int, settings : Settings) -> list:
 
     # Bowsers
     moonCount = 6
-    bowsers_moon_list = [{"name": moons[711]["name"], "trait": " [Story] "}, {"name": moons[712]["name"], "trait": " [Story] "}, {"name": moons[713]["name"], "trait": " [Story] "}, {"name": moons[714]["name"], "trait": " [Story] "}]
+    bowsers_moon_list = [{"name": MOONS[711]["name"], "trait": " [Story] "}, {"name": MOONS[712]["name"], "trait": " [Story] "}, {"name": MOONS[713]["name"], "trait": " [Story] "}, {"name": MOONS[714]["name"], "trait": " [Story] "}]
     sprinkleID = 715
 
     if bowserSprinkle:

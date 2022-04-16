@@ -14,11 +14,11 @@ function initialize() {
 
 function redefine_seed() {
     index = 3;
-    document.getElementById("moon1").innerHTML = current_list[0]['name'];
+    document.getElementById("moon1").innerHTML = current_list[0]['name'] + "<b>" + current_list[0]['trait'] + "</b>";
     collectedMoons.push(current_list[0]['id']);
-    document.getElementById("moon2").innerHTML = current_list[1]['name'];
+    document.getElementById("moon2").innerHTML = current_list[1]['name'] + "<b>" + current_list[1]['trait'] + "</b>";
     collectedMoons.push(current_list[1]['id']);
-    document.getElementById("moon3").innerHTML = current_list[2]['name'];
+    document.getElementById("moon3").innerHTML = current_list[2]['name'] + "<b>" + current_list[2]['trait'] + "</b>";
     collectedMoons.push(current_list[2]['id']);
 }
 
@@ -27,7 +27,7 @@ function generate_new_moon(moonid) {
     moon = current_list[index];
     index++;
     if (collectedMoons.includes(moon['id'])) { generate_new_moon(moonid); }
-    document.getElementById(moonid).innerHTML = moon['name'];
+    document.getElementById(moonid).innerHTML = moon['name'] + "<b>" + moon['trait'] + "</b>";
     collectedMoons.push(moon['id']);
 }
 

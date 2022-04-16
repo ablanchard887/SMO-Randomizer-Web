@@ -20,10 +20,21 @@ def utility_processor():
 def home():
     if request.method == "POST":
         settings = parse_form(request.form)
-        if len(request.form['seed']) > 0:
-            return redirect("/seed/" + str(request.form['seed']) + "?settings=" + str(settings))
+        try:
+            card_mode = request.form['cardmode'] == 'on'
+        except:
+            card_mode = False
+
+        if card_mode:
+            if len(request.form['seed']) > 0:
+                return redirect("/card/" + str(request.form['seed']) + "?settings=" + str(settings))
+            else:
+                return redirect("/card?settings=" + str(settings))
         else:
-            return redirect("/seed?settings=" + str(settings))
+            if len(request.form['seed']) > 0:
+                return redirect("/seed/" + str(request.form['seed']) + "?settings=" + str(settings))
+            else:
+                return redirect("/seed?settings=" + str(settings))
     return render_template('index.html')
 
 
