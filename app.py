@@ -56,15 +56,15 @@ def randomizer(seed : int):
     return render_template('randomizer.html', seed=seed, moons=generate_page(seed_value, settings_class))
 
 
-@app.route("/getcard")
+@app.route("/card")
+@app.route("/card/")
 def get_card():
-    kingdom = request.args.get("kingdom")
-    collectedMoons = request.args.get("collected").split(",")
     settings = request.args.get('settings')
-    prerequisite = request.args.get('prerequisite')
-
-    return talkatoo(kingdom, collectedMoons, decode_settings(settings), prerequisite)
-
+    seed = secrets.token_hex(4)
+    if settings is None:
+        return redirect("/card/" + seed)
+    else:
+        return redirect("/card/" + seed + "?settings=" + settings)
 
 @app.route("/card/<seed>")
 def card(seed : int):
@@ -81,4 +81,4 @@ def card(seed : int):
     else:
         return redirect("/card/" + seed + "?settings=" + str(Settings()))
 
-    return render_template('randomizer.html', seed=seed, moons=generate_page(seed_value, settings_class))
+    return render_template('card.html', seed=seed, moonData=talkatoo(seed_value, settings_class))

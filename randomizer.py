@@ -1,6 +1,7 @@
 import json
 import random
 from settings import Settings
+from generate_list import get_moon_json
 
 with open('moons.json') as moon_file:
     moons = json.load(moon_file)['results']
@@ -9,68 +10,6 @@ with open('moons.json') as moon_file:
 coin_moons = [217, 283, 329, 412, 453, 528, 598, 658, 740]
 purple_moons = [228, 285, 342, 465, 466, 536, 537, 604, 660, 661, 742, 743]
 deep_woods = list(range(334, 343))
-
-KINGDOM_MAP = [
-    {
-        "kingdom": "Cascade",
-        "min": 135,
-        "max": 174
-    },
-    {
-        "kingdom": "Sand",
-        "min": 175,
-        "max": 263,
-        "story_moons": [{"name": moons[177]["name"], "id": 178}, {"name": moons[178]["name"], "id": 179}]
-    },
-    {
-        "kingdom": "Lake",
-        "min": 264,
-        "max": 305,
-        "story_moons": [{"name": moons[264]["name"], "id": 265}]
-    },
-    {
-        "kingdom": "Wooded",
-        "min": 306,
-        "max": 381,
-        "story_moons": [{"name": moons[307]["name"], "id": 308}, {"name": moons[309]["name"], "id": 310}]
-    },
-    {
-        "kingdom": "Lost",
-        "min": 391,
-        "max": 425,
-        "story_moons": []
-    },
-    {
-        "kingdom": "Metro",
-        "min": 426,
-        "max": 506,
-        "story_moons": [{"name": moons[432]["name"], "id": 433}]
-    },
-    {
-        "kingdom": "Snow",
-        "min": 507,
-        "max": 561,
-        "story_moons": [{"name": moons[511]["name"], "id": 512}]
-    },
-    {
-        "kingdom": "Seaside",
-        "min": 562,
-        "max": 632,
-        "story_moons": [{"name": moons[566]["name"], "id": 567}]
-    },
-    {
-        "kingdom": "Luncheon",
-        "min": 633,
-        "max": 700,
-        "story_moons": [{"name": moons[635]["name"], "id": 636}, {"name": moons[637]["name"], "id": 638}]
-    },
-    {
-        "kingdom": "Bowsers",
-        "min": 711,
-        "max": 772,
-        "story_moons": []
-    }
-]
 
 
 def rand(min : int, max : int) -> int:
@@ -140,27 +79,12 @@ def generate(min : int, max : int, prerequisite : int, amount : int, collectedMo
     return return_list
 
 
-def talkatoo(kingdom : str, collectedMoons : list, settings : Settings, prerequisite : int) -> dict:
-    x_min = 0
-    x_max = 0
-    for x in KINGDOM_MAP:
-        if x['kingdom'].lower() == kingdom.lower():
-            x_min = x['min']
-            x_max = x['max']
-            return
-    if x_min == 0 and x_max == 0:
-        return False
-
-    output = {
-        "moons": generate(x_min, x_max, prerequisite, 3, collectedMoons, settings),
-        "collected": collectedMoons
-    }
-
+def talkatoo(seed : int, settings : Settings) -> dict:
+    random.seed(seed)
+    output = get_moon_json()
+    for x in output:
+        random.shuffle(x['moons'])
     return output
-
-
-def kingdom_info(kingdom : str) -> dict:
-    pass
 
 
 def generate_page(seed : int, settings : Settings) -> list:
