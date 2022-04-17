@@ -7,7 +7,7 @@
 </head>
 <body>
     <div class="card">
-        <div class="card-header">SMO-Randomizer (now online)</div>
+        <div class="card-header">SMO-Randomizer</div>
         <form action="" method="POST">
             <ul class="list-group list-group-flush">
                 <li class="list-group-item">
@@ -29,6 +29,7 @@
                     <div class="checkbox">
                         <label>End Bowser's After Story <input type="checkbox" name="sprinkle" id="sprinkle"/></label>
                         <label>Common Peace Skips <input type="checkbox" name="peaceskips" id="peaceskips"/></label>
+                        <label>First Moon Skip <input type="checkbox" name="fms" id="fms"/></label>
                     </div>
                 </li>
                 <li class="list-group-item">
@@ -46,21 +47,26 @@
     <h3>Card Mode</h3>
     <p>Card mode attempts to implement talkatoo% routing into an external tool. The entire moon pool is randomized (with accordance to logic), and only 3 moons will be displayed at a time. Checking one moon off will get the next moon in the list. Buttons are also added allowing for the user to identify where they are in the story so logic can be accounted for.</p>
     <h3>Settings</h3>
-    <p>End Bowser's After Story - Bowsers kingdom can be completed after the mecha broodal fight 100% of the time. Baically, Bowser peace moons are removed from the pool.</p>
-    <p>Common Peace Skips - IP Skip and Snow Clip are accounted for in logic.</p>
+    <p>End Bowser's After Story - Bowsers kingdom can be completed after the mecha broodal fight 100% of the time. Basically, Bowser peace moons are removed from the pool.</p>
+    <p>Common Peace Skips - IP Clip and Snow Clip are accounted for in logic.</p>
+    <p>First Moon Skip - First Moon Skip.</p>
+    <br>
     <p class="footer">Made by <a href="https://twitter.com/aMinibeast">Mini</a>. Source code available <a href="https://github.com/Minibeast/SMO-Randomizer-Web">here</a>.</p>
     <script>
         function disable_settings() {
             chk_card = document.getElementById('cardmode');
             chk_sprinkle = document.getElementById('sprinkle');
             chk_peace = document.getElementById('peaceskips');
+            chk_fms = document.getElementById('fms');
 
             if (chk_card.checked) {
                 chk_sprinkle.setAttribute('disabled', 'disabled');
                 chk_peace.setAttribute('disabled', 'disabled');
+                chk_fms.setAttribute('disabled', 'disabled');
             } else {
                 chk_sprinkle.removeAttribute('disabled');
                 chk_peace.removeAttribute('disabled');
+                chk_fms.removeAttribute('disabled');
             }
         }
     </script>

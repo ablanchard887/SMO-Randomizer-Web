@@ -5,13 +5,15 @@ class Settings:
     overrides : list
     bowser_sprinkle : bool
     peace_skips : bool
+    fms : bool
     version : str
 
     def __init__(self) -> None:
         self.overrides = []
         self.bowser_sprinkle = False
         self.peace_skips = False
-        self.version = "0.1.0"
+        self.fms = False
+        self.version = "0.2.0"
 
     def __str__(self) -> str:
         return encode_settings(self)
@@ -57,6 +59,10 @@ def parse_form(settings : dict) -> Settings:
         peace = settings['peaceskips'] == "on"
     except:
         peace = False
+    try:
+        fms = settings['fms'] == "on"
+    except:
+        fms = False
 
     allowlist = settings['allowlist'].split("\n")
     blocklist = settings['blocklist'].split("\n")
@@ -82,6 +88,7 @@ def parse_form(settings : dict) -> Settings:
     settings_class.bowser_sprinkle = sprinkle
     settings_class.peace_skips = peace
     settings_class.overrides = overrides
+    settings_class.fms = fms
 
     return settings_class
 
@@ -99,6 +106,9 @@ def decode_settings(settings : str) -> Settings:
     settings.peace_skips = peaceskips
     settings.bowser_sprinkle = sprinkle
     settings.overrides = overrides
+
+    if settings_ver != "0.1.0":
+        settings.fms = check_bool(decoded_settings_list[4])
     
     return settings
 
@@ -107,7 +117,8 @@ def encode_settings(settings : Settings) -> str:
     output = str(settings.version) + "P"
     output += overrides_to_string(settings.overrides) + "P"
     output += str(settings.bowser_sprinkle) + "P"
-    output += str(settings.peace_skips)
+    output += str(settings.peace_skips) + "P"
+    output += str(settings.fms)
     return str(base64.urlsafe_b64encode(bytes(output, "UTF-8")), "UTF-8")
 
 if __name__ == '__main__':

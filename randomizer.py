@@ -87,9 +87,12 @@ def generate_page(seed : int, settings : Settings) -> list:
     collectedmoons = []
 
     # Cascade
-    cascade_moon_list = [{"name": MOONS[135]["name"], "trait": " [Story] "}, {"name": MOONS[136]["name"], "trait": " [Story] "}]
+    if settings.fms:
+        cascade_moon_list = [{"name": MOONS[136]["name"], "trait": " [Story] "}] + generate(135, 174, 137, 2, collectedmoons, settings)
+    else:
+        cascade_moon_list = [{"name": MOONS[135]["name"], "trait": " [Story] "}, {"name": MOONS[136]["name"], "trait": " [Story] "}] + generate(135, 174, 137, 1, collectedmoons, settings)
 
-    output.append({"kingdom": "Cascade", "moons": cascade_moon_list + generate(135, 174, 137, 1, collectedmoons, settings)})
+    output.append({"kingdom": "Cascade", "moons": cascade_moon_list})
     #
 
     # Sand
